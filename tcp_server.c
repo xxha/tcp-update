@@ -73,34 +73,32 @@ int main(int argc, char *argv[])
         }  
 
 	for (;;){      
-        /* 设置侦听 */  
-        err = listen(ss, BACKLOG);  
-        if (err < 0)  
-        {                           /* 出错 */  
-            printf("listen error\n");  
-            return -1;  
-        }  
+        	/* 设置侦听 */  
+        	err = listen(ss, BACKLOG);  
+        	if (err < 0)  
+        	{                           /* 出错 */  
+        		printf("listen error\n");  
+			return -1;  
+        	}  
       
-//        for (;;)  
-//        {  
-            int addrlen = sizeof(struct sockaddr);  
-            /* 接收客户端连接 */  
-            sc = accept(ss, (struct sockaddr *)&client_addr, &addrlen);  
-            if (sc < 0)  
-            {                       /* 出错 */  
-		printf("Can't accept the new connection!\n");
-                continue;           /* 结束本次循环 */  
-            }  
+            	int addrlen = sizeof(struct sockaddr);  
+            	/* 接收客户端连接 */  
+            	sc = accept(ss, (struct sockaddr *)&client_addr, &addrlen);  
+            	if (sc < 0)  
+            	{                       /* 出错 */  
+			printf("Can't accept the new connection!\n");
+                	continue;           /* 结束本次循环 */  
+            	}  
       
-            /* 建立一个新的进程处理到来的连接 */  
-            pid = fork();           /* 分叉进程 */  
-            if (pid == 0)  
-            {                       /* 子进程中 */  
-                close(ss);          /* 在子进程中关闭服务器的侦听 */  
-                process_conn_server(sc);    /* 处理连接 */  
-            }else{  
-                close(sc);          /* 在父进程中关闭客户端的连接 */  
-            }  
+            	/* 建立一个新的进程处理到来的连接 */  
+            	pid = fork();           /* 分叉进程 */  
+            	if (pid == 0)  
+            	{                       /* 子进程中 */  
+                	close(ss);          /* 在子进程中关闭服务器的侦听 */  
+                	process_conn_server(sc);    /* 处理连接 */  
+            	}else{  
+                	close(sc);          /* 在父进程中关闭客户端的连接 */  
+            	}  
         }  
 }  
 

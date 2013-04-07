@@ -25,6 +25,9 @@ static int mod_s;
 #define	IMAGE_DEL_ERROR		0x18
 #define	MD5_ERROR		0x19
 
+#define CD_TMP_ERROR            0x20
+#define WRITE_USR_ERROR         0x21
+
 
 #define	MEMSIZE	1024
 
@@ -49,7 +52,7 @@ int sendcmd(int s, char * cmdp, unsigned int len)
         }else{
                 memset(buffer, '\0', MEMSIZE);
                 read(s, buffer, MEMSIZE);   /* 从服务器读取数据 */
-//                printf("Server send: 0x%x to me\n", *((int *)buffer));
+                printf("Server send: 0x%x to me\n", *((int *)buffer));
 		
 		return *((int *)buffer);
         }
@@ -71,7 +74,7 @@ void sdup(int s, char * hostip, char * filename)
 	fprintf(log_fd, "%s ", cmd);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret < 0){
-		fprintf(log_fd,"FAILED\n");
+		fprintf(log_fd,"No SD card found, upgrade SD card exit.\n");
 		fclose(log_fd);
 		exit(SD_ERROR);
 	}
@@ -222,8 +225,98 @@ void sdup(int s, char * hostip, char * filename)
 
 	printf("SD upgrade SUCCESS\n");
 }
- 
-     
+
+void norup(int s, char * hostip, char * filename)
+{
+	char cmd[MEMSIZE];
+        int ret = 0;
+	char board[5] = "";
+
+        memset(cmd, '\0', MEMSIZE);
+        sprintf(cmd, "cd /tmp");
+        fprintf(log_fd, "%s ", cmd);
+        ret = sendcmd(s, cmd, sizeof(cmd));
+        if(ret != 0){
+                fprintf(log_fd,"FAILED\n");
+                fclose(log_fd);
+                exit(CD_TMP_ERROR);
+        }
+        fprintf(log_fd, "OK.\n");
+	printf("filename = %s\n", filename);
+
+	strncpy(board, filename + 13, 3);
+	printf("board name = %s.\n", board);
+
+        memset(cmd, '\0', MEMSIZE);
+        sprintf(cmd, "ftpget -u v400 -p v400 %s %s /usr/local/%s/share/%s", hostip, filename, board, filename);
+        fprintf(log_fd, "%s ", cmd);
+        ret = sendcmd(s, cmd, sizeof(cmd));
+        if(ret != 0){
+                fprintf(log_fd,"FAILED\n");
+                fclose(log_fd);
+                exit(IMAGE_GET_ERROR);
+        }
+        fprintf(log_fd, "OK.\n");
+
+        memset(cmd, '\0', MEMSIZE);
+        sprintf(cmd, "tar xvf %s", filename);
+        fprintf(log_fd, "%s ", cmd);
+        ret = sendcmd(s, cmd, sizeof(cmd));
+        if(ret != 0){
+                fprintf(log_fd,"FAILED\n");
+                fclose(log_fd);
+                exit(IMAGE_UNZIP_ERROR);
+        }
+        fprintf(log_fd, "OK.\n");
+
+        memset(cmd, '\0', MEMSIZE);
+        sprintf(cmd, "rm ux400*", filename);
+        fprintf(log_fd, "%s ", cmd);
+        ret = sendcmd(s, cmd, sizeof(cmd));
+        if(ret != 0){
+                fprintf(log_fd,"FAILED\n");
+                fclose(log_fd);
+                exit(IMAGE_UNZIP_ERROR);
+        }
+        fprintf(log_fd, "OK.\n");
+
+        memset(cmd, '\0', MEMSIZE);
+        sprintf(cmd, "yes|uuu -w userfs.jffs2 UserFSA");
+        fprintf(log_fd, "%s ", cmd);
+        ret = sendcmd(s, cmd, sizeof(cmd));
+        if(ret != 0){
+                fprintf(log_fd,"FAILED\n");
+                fclose(log_fd);
+                exit(WRITE_USR_ERROR);
+        }
+        fprintf(log_fd, "OK.\n");
+
+        memset(cmd, '\0', MEMSIZE);
+        sprintf(cmd, "rm tmp");
+        fprintf(log_fd, "%s ", cmd);
+        ret = sendcmd(s, cmd, sizeof(cmd));
+        if(ret != 0){
+                fprintf(log_fd,"FAILED\n");
+                fclose(log_fd);
+                exit(IMAGE_UNZIP_ERROR);
+        }
+        fprintf(log_fd, "OK.\n");
+
+        memset(cmd, '\0', MEMSIZE);
+        sprintf(cmd, "rm userfs.jffs2 userfs.jffs2.md5");
+        fprintf(log_fd, "%s ", cmd);
+        ret = sendcmd(s, cmd, sizeof(cmd));
+        if(ret != 0){
+                fprintf(log_fd,"FAILED\n");
+                fclose(log_fd);
+                exit(IMAGE_UNZIP_ERROR);
+        }
+        fprintf(log_fd, "OK.\n");
+
+	printf("Norflash upgrade SUCCESS\n");
+
+
+}
 int main(int argc, char *argv[])  
 {  
         int port;  
@@ -278,9 +371,12 @@ int main(int argc, char *argv[])
 	}
 //        process_conn_client(s);     /* 客户端处理过程 */  
 
-	fprintf(log_fd, "Server %s connect successed, start SD upgrade now\n", argv[1]);
+	fprintf(log_fd, "Server %s connect successed, start upgrading now\n", argv[1]);
 
+#if 0
 	sdup(mod_s, argv[3], argv[4]);
+#endif
+	norup(mod_s, argv[3], argv[4]);
 	
         close(mod_s);                   /* 关闭连接 */  
 
