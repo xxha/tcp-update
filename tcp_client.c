@@ -70,7 +70,7 @@ int sendcmd(int s, char * cmdp, unsigned int len)
 	}
 }
 
-void sdup(int s, char * hostip, char * filename)
+void sdup(int s, char * hostip, char * filename, char * board)
 {
 	ssize_t size = 0;
 	char cmd[MEMSIZE];
@@ -79,11 +79,15 @@ void sdup(int s, char * hostip, char * filename)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mdev -s");
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	sendcmd(s, cmd, sizeof(cmd));
 
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "ls /dev/mmcblk0*");
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret < 0){
 		fprintf(log_fd,"No SD card found, upgrade SD card exit.\n");
@@ -97,6 +101,8 @@ void sdup(int s, char * hostip, char * filename)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "umount /mnt/sd");
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		sleep(1);
@@ -109,16 +115,22 @@ void sdup(int s, char * hostip, char * filename)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "/tmp/parted.sh /dev/mmcblk0");
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	sendcmd(s, cmd, sizeof(cmd));
 
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mke2fs -T ext2 /dev/mmcblk0p1");
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd, "FAILED.\n");
 		memset(cmd, '\0', MEMSIZE);
 		sprintf(cmd, "/tmp/mke2fs -T ext2 /dev/mmcblk0p1");
+		printf("%s\r", cmd);
+		fflush(stdout);
 		ret = sendcmd(s, cmd, sizeof(cmd));
 		fprintf(log_fd, "%s ", cmd);
 		if(ret != 0){
@@ -132,6 +144,8 @@ void sdup(int s, char * hostip, char * filename)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mkdir /tmp/images");
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd, "FAILED.\n");
@@ -142,6 +156,8 @@ void sdup(int s, char * hostip, char * filename)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mount -t jffs2 /dev/mtdblock3 /tmp/images");
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd, "FAILED.\n");
@@ -152,6 +168,8 @@ void sdup(int s, char * hostip, char * filename)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "dd if=/dev/mmcblk0 of=/tmp/images/mbr.bin bs=512 count=1");
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
@@ -163,16 +181,22 @@ void sdup(int s, char * hostip, char * filename)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mount / -o remount,rw");
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	sendcmd(s, cmd, sizeof(cmd));
 
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mkdir /mnt/sd");
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	sendcmd(s, cmd, sizeof(cmd));
 
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mount -t ext2 /dev/mmcblk0p1 /mnt/sd");
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
@@ -182,8 +206,10 @@ void sdup(int s, char * hostip, char * filename)
 	fprintf(log_fd, "OK.\n");
 
 	memset(cmd, '\0', MEMSIZE);
-	sprintf(cmd, "ftpget -u v400 -p v400 %s /mnt/sd/%s %s", hostip, filename, filename);
+	sprintf(cmd, "ftpget -u v400 -p v400 %s /mnt/sd/%s /usr/local/%s/share/%s", hostip, filename, board, filename);
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
@@ -195,6 +221,8 @@ void sdup(int s, char * hostip, char * filename)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "tar -xzvf /mnt/sd/%s -C /mnt/sd", filename);
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
@@ -206,6 +234,8 @@ void sdup(int s, char * hostip, char * filename)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "rm -rf /mnt/sd/%s", filename);
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
@@ -217,6 +247,8 @@ void sdup(int s, char * hostip, char * filename)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "md5sum -c /mnt/sd/sd.md5", filename);
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
@@ -228,6 +260,8 @@ void sdup(int s, char * hostip, char * filename)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "umount /mnt/sd", filename);
 	fprintf(log_fd, "%s ", cmd);
+	printf("%s\r", cmd);
+	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
@@ -610,14 +644,15 @@ int main(int argc, char *argv[])
 	int port;
 	struct sockaddr_in server_addr; /* 服务器地址结构 */
 	int ret = 0;
-	char borsd[BOARD_NAME_MAX_SIZE] = "";
-	char *tmp1;
-	char *tmp2 = "sd";
+	char *sdimage = "ux400-module-sd.tar.gz";
+//	char *image = argv[3];
+//	char *board = argv[5];
 
 
-	log_fd = fopen(argv[5], "w+");
+	printf("board = %s.\n", argv[5]);
+	log_fd = fopen(argv[6], "w+");
 	if(log_fd == NULL){
-		printf("Log file %s open failed!\n", argv[5]);
+		printf("Log file %s open failed!\n", argv[6]);
 		exit(4);
 	}
 
@@ -668,33 +703,21 @@ int main(int argc, char *argv[])
 	fprintf(log_fd, "Server %s connect successed, start upgrading now\n", argv[1]);
 	printf("Server %s connect successed, start upgrading now\n", argv[1]);
 
-	tmp1 = borsd;
-	getboard(argv[4], borsd);
-	printf("tmp1 = %s.\n", tmp1);
-	printf("tmp2 = %s.\n", tmp2);
-	printf("borsd = %s.\n", borsd);
-
-	if (strcmp(tmp1, tmp2) == 0) {
+	if (strcmp(sdimage, argv[3]) == 0) {
 		fprintf(log_fd, "Upgrading SD card.\n", argv[1]);
 		printf("Upgrading SD card.\n", argv[1]);
-	//	sdup(mod_s, argv[3], argv[4]);
+		sdup(mod_s, argv[3], argv[4], argv[5]);
 	} else {
 		fprintf(log_fd, "Upgrading Norflash.\n", argv[1]);
 		printf("Upgrading Norflash.\n", argv[1]);
-		norup(mod_s, argv[3], argv[4], tmp1);
-		strcpy(boardname, tmp1);
-		printf("boardname = %s.\n", boardname);
+		norup(mod_s, argv[3], argv[4], argv[5]);
 	}
-#if 0
-	norup(mod_s, argv[3], argv[4]);
-	sdup(mod_s, argv[3], argv[4]);
-#endif
+
 	close(mod_s);		  /* 关闭连接 */
+	fclose(log_fd);
 
 	fprintf(log_fd, "Subboard upgrade SUCCESS!\n");
 	printf("Subboard upgrade SUCCESS!\n");
-
-	fclose(log_fd);
 
 	exit(0);
 }

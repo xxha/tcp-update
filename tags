@@ -5,46 +5,47 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 BACKLOG	tcp_server.c	13;"	d	file:
-BOARD_NAME_MAX_SIZE	tcp_client.c	43;"	d	file:
+BOARD_NAME_MAX_SIZE	tcp_client.c	38;"	d	file:
 CC	Makefile	/^CC = gcc$/;"	m
-CD_TMP_ERROR	tcp_client.c	27;"	d	file:
-CHANGE_MODE_ERROR	tcp_client.c	29;"	d	file:
+CD_TMP_ERROR	tcp_client.c	23;"	d	file:
+CHANGE_MODE_ERROR	tcp_client.c	25;"	d	file:
 CROSS_COMPILE	Makefile	/^CROSS_COMPILE = \/home\/xxha\/cross_compile\/gcc-4.1.2-glibc-2.5-nptl-3\/arm-none-linux-gnueabi\/bin\/arm-none-linux-gnueabi-$/;"	m
-GET_BOARD_ERROR	tcp_client.c	32;"	d	file:
-IMAGE_DEL_ERROR	tcp_client.c	25;"	d	file:
-IMAGE_GET_ERROR	tcp_client.c	23;"	d	file:
-IMAGE_UNZIP_ERROR	tcp_client.c	24;"	d	file:
-INSMOD_ERROR	tcp_client.c	37;"	d	file:
-KILL_USR_ERROR	tcp_client.c	30;"	d	file:
+GET_BOARD_ERROR	tcp_client.c	28;"	d	file:
+IMAGE_DEL_ERROR	tcp_client.c	21;"	d	file:
+IMAGE_GET_ERROR	tcp_client.c	19;"	d	file:
+IMAGE_UNZIP_ERROR	tcp_client.c	20;"	d	file:
+INSMOD_ERROR	tcp_client.c	33;"	d	file:
+KILL_USR_ERROR	tcp_client.c	26;"	d	file:
 LD	Makefile	/^LD = ld$/;"	m
-MBR_BACKUP_ERROR	tcp_client.c	21;"	d	file:
-MD5_ERROR	tcp_client.c	26;"	d	file:
-MEMSIZE	tcp_client.c	41;"	d	file:
+MBR_BACKUP_ERROR	tcp_client.c	17;"	d	file:
+MD5_ERROR	tcp_client.c	22;"	d	file:
+MEMSIZE	tcp_client.c	36;"	d	file:
 MEMSIZE	tcp_process.c	9;"	d	file:
-MTD_MOUNT_ERROR	tcp_client.c	20;"	d	file:
-REDUNDANT	tcp_client.c	44;"	d	file:
-RMMOD_ERROR	tcp_client.c	38;"	d	file:
-RM_FILE_ERROR	tcp_client.c	33;"	d	file:
-SD_ERROR	tcp_client.c	17;"	d	file:
-SD_FORMAT_ERROR	tcp_client.c	18;"	d	file:
-SD_MOUNT_ERROR	tcp_client.c	22;"	d	file:
-SLEEP_ERROR	tcp_client.c	36;"	d	file:
-TMP_WRITE_ERROR	tcp_client.c	19;"	d	file:
-UMOUNT_USR_ERROR	tcp_client.c	31;"	d	file:
-WRITE_KERNEL_ERROR	tcp_client.c	34;"	d	file:
-WRITE_ROOTFS_ERROR	tcp_client.c	35;"	d	file:
-WRITE_USR_ERROR	tcp_client.c	28;"	d	file:
-getboard	tcp_client.c	/^void getboard(char * filename, char * boardname)$/;"	f
+MTD_MOUNT_ERROR	tcp_client.c	16;"	d	file:
+REDUNDANT	tcp_client.c	39;"	d	file:
+RMMOD_ERROR	tcp_client.c	34;"	d	file:
+RM_FILE_ERROR	tcp_client.c	29;"	d	file:
+SD_ERROR	tcp_client.c	13;"	d	file:
+SD_FORMAT_ERROR	tcp_client.c	14;"	d	file:
+SD_MOUNT_ERROR	tcp_client.c	18;"	d	file:
+SLEEP_ERROR	tcp_client.c	32;"	d	file:
+TMP_WRITE_ERROR	tcp_client.c	15;"	d	file:
+UMOUNT_USR_ERROR	tcp_client.c	27;"	d	file:
+WRITE_KERNEL_ERROR	tcp_client.c	30;"	d	file:
+WRITE_ROOTFS_ERROR	tcp_client.c	31;"	d	file:
+WRITE_USR_ERROR	tcp_client.c	24;"	d	file:
+boardname	tcp_client.c	/^static char boardname[BOARD_NAME_MAX_SIZE];$/;"	v	file:
+getboard	tcp_client.c	/^void getboard(char * filename, char * board)$/;"	f
 log_fd	tcp_client.c	/^FILE * log_fd = NULL;$/;"	v
 main	tcp_client.c	/^int main(int argc, char *argv[])$/;"	f
 main	tcp_client_debug.c	/^int main(int argc, char *argv[])  $/;"	f
 main	tcp_server.c	/^int main(int argc, char *argv[])  $/;"	f
 mod_s	tcp_client.c	/^static int mod_s;$/;"	v	file:
-norup	tcp_client.c	/^void norup(int s, char * hostip, char * filename)$/;"	f
+norup	tcp_client.c	/^void norup(int s, char * hostip, char * filename, char *board)$/;"	f
 process_conn_client	tcp_process.c	/^void process_conn_client(int s)  $/;"	f
 process_conn_server	tcp_process.c	/^void process_conn_server(int s)  $/;"	f
 s	tcp_client_debug.c	/^static int s;  $/;"	v	file:
-sdup	tcp_client.c	/^void sdup(int s, char * hostip, char * filename)$/;"	f
+sdup	tcp_client.c	/^void sdup(int s, char * hostip, char * filename, char * board)$/;"	f
 sendcmd	tcp_client.c	/^int sendcmd(int s, char * cmdp, unsigned int len)$/;"	f
 sig_child	tcp_process.c	/^void sig_child(int signo)$/;"	f
 sig_hup	tcp_server.c	/^void sig_hup(int signo)$/;"	f
