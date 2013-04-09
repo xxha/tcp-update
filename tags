@@ -5,28 +5,36 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 BACKLOG	tcp_server.c	13;"	d	file:
+BOARD_NAME_MAX_SIZE	tcp_client.c	38;"	d	file:
 CC	Makefile	/^CC = gcc$/;"	m
-CD_TMP_ERROR	tcp_client.c	28;"	d	file:
+CD_TMP_ERROR	tcp_client.c	27;"	d	file:
+CHANGE_MODE_ERROR	tcp_client.c	29;"	d	file:
 CROSS_COMPILE	Makefile	/^CROSS_COMPILE = \/home\/xxha\/cross_compile\/gcc-4.1.2-glibc-2.5-nptl-3\/arm-none-linux-gnueabi\/bin\/arm-none-linux-gnueabi-$/;"	m
+GET_BOARD_ERROR	tcp_client.c	32;"	d	file:
 IMAGE_DEL_ERROR	tcp_client.c	25;"	d	file:
 IMAGE_GET_ERROR	tcp_client.c	23;"	d	file:
 IMAGE_UNZIP_ERROR	tcp_client.c	24;"	d	file:
+KILL_USR_ERROR	tcp_client.c	30;"	d	file:
 LD	Makefile	/^LD = ld$/;"	m
 MBR_BACKUP_ERROR	tcp_client.c	21;"	d	file:
 MD5_ERROR	tcp_client.c	26;"	d	file:
-MEMSIZE	tcp_client.c	32;"	d	file:
+MEMSIZE	tcp_client.c	36;"	d	file:
 MEMSIZE	tcp_process.c	9;"	d	file:
 MTD_MOUNT_ERROR	tcp_client.c	20;"	d	file:
+REDUNDANT	tcp_client.c	39;"	d	file:
+RM_FILE_ERROR	tcp_client.c	33;"	d	file:
 SD_ERROR	tcp_client.c	17;"	d	file:
 SD_FORMAT_ERROR	tcp_client.c	18;"	d	file:
 SD_MOUNT_ERROR	tcp_client.c	22;"	d	file:
 TMP_WRITE_ERROR	tcp_client.c	19;"	d	file:
-WRITE_USR_ERROR	tcp_client.c	29;"	d	file:
+UMOUNT_USR_ERROR	tcp_client.c	31;"	d	file:
+WRITE_USR_ERROR	tcp_client.c	28;"	d	file:
+getboard	tcp_client.c	/^void getboard(char * filename, char * boardname)$/;"	f
 log_fd	tcp_client.c	/^FILE * log_fd = NULL;$/;"	v
-main	tcp_client.c	/^int main(int argc, char *argv[])  $/;"	f
+main	tcp_client.c	/^int main(int argc, char *argv[])$/;"	f
 main	tcp_client_debug.c	/^int main(int argc, char *argv[])  $/;"	f
 main	tcp_server.c	/^int main(int argc, char *argv[])  $/;"	f
-mod_s	tcp_client.c	/^static int mod_s;  $/;"	v	file:
+mod_s	tcp_client.c	/^static int mod_s;$/;"	v	file:
 norup	tcp_client.c	/^void norup(int s, char * hostip, char * filename)$/;"	f
 process_conn_client	tcp_process.c	/^void process_conn_client(int s)  $/;"	f
 process_conn_server	tcp_process.c	/^void process_conn_server(int s)  $/;"	f
@@ -37,5 +45,5 @@ sig_child	tcp_process.c	/^void sig_child(int signo)$/;"	f
 sig_hup	tcp_server.c	/^void sig_hup(int signo)$/;"	f
 sig_pipe	tcp_process.c	/^void sig_pipe(int sign)  $/;"	f
 sig_proccess	tcp_process.c	/^void sig_proccess(int signo)  $/;"	f
-sig_proccess_client	tcp_client.c	/^void sig_proccess_client(int signo)  $/;"	f
+sig_proccess_client	tcp_client.c	/^void sig_proccess_client(int signo)$/;"	f
 sig_proccess_client	tcp_client_debug.c	/^void sig_proccess_client(int signo)  $/;"	f
