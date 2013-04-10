@@ -10,7 +10,7 @@
 extern void sig_proccess(int signo);  
 extern void sig_child(int signo);
      
-#define BACKLOG 5               /* 侦听队列长度 */  
+#define BACKLOG 5               /* listen queue length */  
  
 void sig_hup(int signo)
 {
@@ -19,7 +19,7 @@ void sig_hup(int signo)
      
 /************************************************* 
 * Function    :  
-* Description : 服务端主程序 
+* Description : server main routine
 * Calls       : process_conn_server 
 * Called By   :  
 * Input       :  
@@ -36,68 +36,68 @@ int main(int argc, char *argv[])
         }  
       
         int port;  
-        int ss, sc;                 /* ss为服务器的socket描述符,sc为客户端的socket描述符 */  
-        struct sockaddr_in server_addr; /* 服务器地址结构 */  
-        struct sockaddr_in client_addr; /* 客户端地址结构 */  
-        int err;                    /* 返回值 */  
-        pid_t pid;                  /* 分叉的进行id */  
+        int ss, sc;                 /* ss: server socket descriptor, sc: client socket descriptor */  
+        struct sockaddr_in server_addr; /* sever address struct */  
+        struct sockaddr_in client_addr; /* client address struct */  
+        int err;                    /* return value */  
+        pid_t pid;                  /* fork create sub process */  
       
         signal(SIGINT, sig_proccess);  
         signal(SIGPIPE, sig_proccess);  
 	signal(SIGCHLD, sig_child);
-//	signal(SIGHUP, sig_hup);
+	//signal(SIGHUP, sig_hup);
 
       
-        /* 建立一个流式套接字 */  
+        /* setup stream socket */  
         ss = socket(AF_INET, SOCK_STREAM, 0);  
         if (ss < 0)  
-        {                           /* 出错 */  
+        {   /* error */  
             printf("socket error\n");  
             return -1;  
         }  
-        //获得输入的端口   
+        /* get input port */  
         port = atoi(argv[1]);  
       
-        /* 设置服务器地址 */  
-        bzero(&server_addr, sizeof(server_addr));   /* 清0 */  
-        server_addr.sin_family = AF_INET;   /* 协议族 */  
-        server_addr.sin_addr.s_addr = htonl(INADDR_ANY);    /* 本地地址 */  
-        server_addr.sin_port = htons(port); /* 服务器端口 */  
+        /* config server address */  
+        bzero(&server_addr, sizeof(server_addr));   /* clear 0 */  
+        server_addr.sin_family = AF_INET;   /* protocol set */  
+        server_addr.sin_addr.s_addr = htonl(INADDR_ANY);    /* local address */  
+        server_addr.sin_port = htons(port); /* server port */  
       
-        /* 绑定地址结构到套接字描述符 */  
+        /* bind address struct to socket descriptor */  
         err = bind(ss, (struct sockaddr *)&server_addr, sizeof(server_addr));  
         if (err < 0)  
-        {                           /* 出错 */  
+        {  
             printf("bind error\n");  
             return -1;  
         }  
 
 	for (;;){      
-        	/* 设置侦听 */  
+        	/* set listen */  
         	err = listen(ss, BACKLOG);  
         	if (err < 0)  
-        	{                           /* 出错 */  
+        	{
         		printf("listen error\n");  
 			return -1;  
         	}  
       
             	int addrlen = sizeof(struct sockaddr);  
-            	/* 接收客户端连接 */  
+            	/* accpet client connect */  
             	sc = accept(ss, (struct sockaddr *)&client_addr, &addrlen);  
             	if (sc < 0)  
-            	{                       /* 出错 */  
+            	{	/* error */
 			printf("Can't accept the new connection!\n");
-                	continue;           /* 结束本次循环 */  
+                	continue;           /* current loop over */  
             	}  
       
-            	/* 建立一个新的进程处理到来的连接 */  
-            	pid = fork();           /* 分叉进程 */  
+            	/* create a new process to deal with the comming connection */  
+            	pid = fork();           /* create sub process */  
             	if (pid == 0)  
-            	{                       /* 子进程中 */  
-                	close(ss);          /* 在子进程中关闭服务器的侦听 */  
-                	process_conn_server(sc);    /* 处理连接 */  
+            	{                       /* in sub process */  
+                	close(ss);          /* close server listen */  
+                	process_conn_server(sc);    /* process connection */  
             	}else{  
-                	close(sc);          /* 在父进程中关闭客户端的连接 */  
+                	close(sc);          /* in parent process, close client connection. */  
             	}  
         }  
 }  

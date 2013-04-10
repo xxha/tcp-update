@@ -46,7 +46,7 @@ FILE * log_fd = NULL;
 
 void sig_proccess_client(int signo)
 {
-//	printf("Catch a exit signal\n");
+	//printf("Catch a exit signal\n");
 	close(mod_s);
 	exit(0);
 }
@@ -56,13 +56,13 @@ int sendcmd(int s, char * cmdp, unsigned int len)
 	int ret = 0;
 	char buffer[MEMSIZE];
 
-	ret = write(s, cmdp, len); /* 发送给服务器 */
+	ret = write(s, cmdp, len); /* send to server */
 	if(ret < 0){
 		perror("socket write");
 		return -1;
 	}else{
 		memset(buffer, '\0', MEMSIZE);
-		read(s, buffer, MEMSIZE);   /* 从服务器读取数据 */
+		read(s, buffer, MEMSIZE);   /* read data from server */
 		//printf("Server send: 0x%x to me\n", *((int *)buffer));
 
 		return *((int *)buffer);
@@ -593,7 +593,7 @@ void flashup(int s, char * hostip, char * filename, char *board)
 int main(int argc, char *argv[])
 {
 	int port;
-	struct sockaddr_in server_addr; /* 服务器地址结构 */
+	struct sockaddr_in server_addr; /* server address struct */
 	int ret = 0;
 	char *sdimage = "ux400-module-sd.tar.gz";
 
@@ -615,10 +615,10 @@ int main(int argc, char *argv[])
 	signal(SIGINT, sig_proccess);
 	signal(SIGPIPE, sig_pipe);
 
-	/* 建立一个流式套接字 */
+	/* setup a stream socket */
 	mod_s = socket(AF_INET, SOCK_STREAM, 0);
 	if (mod_s < 0)
-	{			  /* 出错 */
+	{	/* error */
 		printf("socket error\n");
 		fprintf(log_fd, "socket error\n");
 		fclose(log_fd);
@@ -627,15 +627,15 @@ int main(int argc, char *argv[])
 
 	port = atoi(argv[2]);
 
-	/* 设置服务器地址 */
-	bzero(&server_addr, sizeof(server_addr));   /* 清0 */
-	server_addr.sin_family = AF_INET;   /* 协议族 */
-	server_addr.sin_port = htons(port); /* 服务器端口 */
+	/* config server address */
+	bzero(&server_addr, sizeof(server_addr));   /* clear 0 */
+	server_addr.sin_family = AF_INET;   /* protocol set */
+	server_addr.sin_port = htons(port); /* server port */
 	server_addr.sin_addr.s_addr = inet_addr(argv[1]);
 
 	bzero(&(server_addr.sin_zero), 8);
 
-	/* 连接服务器 */
+	/* connect server */
 	ret = connect(mod_s, (struct sockaddr *)&server_addr, sizeof(server_addr));
 	if(ret < 0){
 		printf("Connect to server %s failed.\n", argv[1]);
@@ -644,7 +644,7 @@ int main(int argc, char *argv[])
 		exit(4);
 	}
 #if 0
-	process_conn_client(s);     /* 客户端处理过程 */
+	process_conn_client(s);     /* client process */
 #endif
 	fprintf(log_fd, "Server %s connect successed, start upgrading now\n", argv[1]);
 
@@ -660,7 +660,7 @@ int main(int argc, char *argv[])
 		flashup(mod_s, argv[3], argv[4], argv[5]);
 	}
 
-	close(mod_s);		  /* 关闭连接 */
+	close(mod_s);		  /* close connect */
 	fclose(log_fd);
 	exit(0);
 }

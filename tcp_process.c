@@ -10,7 +10,7 @@
       
 /************************************************* 
 * Function    :  
-* Description : 服务器对客户端的处理 
+* Description : server process client 
 * Calls       :  
 * Called By   :  
 * Input       :  
@@ -20,23 +20,23 @@
 void process_conn_server(int s)  
 {  
 	ssize_t size = 0;  
-        char buffer[MEMSIZE];          /* 数据的缓冲区 */ 
+        char buffer[MEMSIZE];          /* data buffer */ 
 	char cmd[MEMSIZE];
 	int ret = 0;
 	int status = 0;
 	int temp = 0;
       
         for (;;)  
-        {                           /* 循环处理过程 */  
-            /* 从套接字中读取数据放到缓冲区buffer中 */  
+        {	/* loop process */  
+		/* read data from socket, and put data to buffer. */  
 		memset(buffer, '\0', MEMSIZE);  
 		size = read(s, buffer, MEMSIZE);  
 		if (size == 0)  
-		{                       /* 没有数据 */  
+		{                       /* no data */  
 			return;  
 		}  
-//		printf("CMD: %s\n", buffer);
-//		buffer[size-1] = ' ';
+		//printf("CMD: %s\n", buffer);
+		//buffer[size-1] = ' ';
 		sprintf(cmd, "%s > /dev/null 2>&1", buffer);
 		status = system(cmd);
 		if(status == -1){
@@ -59,7 +59,7 @@ void process_conn_server(int s)
       
 /************************************************* 
 * Function    :  
-* Description : 客户端的处理过程 
+* Description : client process
 * Calls       :  
 * Called By   :  
 * Input       :  
@@ -69,22 +69,22 @@ void process_conn_server(int s)
 void process_conn_client(int s)  
 {  
         ssize_t size = 0;  
-        char buffer[MEMSIZE];          /* 数据的缓冲区 */  
+        char buffer[MEMSIZE];          /* data buffer */  
 	int ret = 0;
       
         for (;;)  
-        {                           /* 循环处理过程 */  
+        {                           /* loop process */  
 		memset(buffer, '\0', MEMSIZE);
-            /* 从标准输入中读取数据放到缓冲区buffer中 */  
+            /* read data from stdin, and put data into buffer */  
 		size = read(0, buffer, MEMSIZE);
 		if (size > 1)  
-		{                       /* 读到数据 */  
-			ret = write(s, buffer, size-1); /* 发送给服务器 */ 
+		{                       /* read data */  
+			ret = write(s, buffer, size-1); /* send to server */ 
 			if(ret < 0){
 				perror("socket write");
 			}else{
 				memset(buffer, '\0', MEMSIZE);
-				size = read(s, buffer, MEMSIZE);   /* 从服务器读取数据 */  
+				size = read(s, buffer, MEMSIZE);   /* read data from server */  
 				printf("Server send: 0x%x to me\n", *((int *)buffer));
 			}
 		}  
