@@ -4,7 +4,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
-//#include <linux/in.h>
 #include <signal.h>
 #include <errno.h>
 #include <netinet/in.h>
@@ -79,19 +78,16 @@ void sdup(int s, char * hostip, char * filename, char * board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mdev -s");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	sendcmd(s, cmd, sizeof(cmd));
 
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "ls /dev/mmcblk0*");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret < 0){
 		fprintf(log_fd,"No SD card found, upgrade SD card exit.\n");
 		fclose(log_fd);
+		printf("No SD card found, upgrade SD card exit.\n");
 		exit(SD_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -101,8 +97,6 @@ void sdup(int s, char * hostip, char * filename, char * board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "umount /mnt/sd");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		sleep(1);
@@ -115,27 +109,22 @@ void sdup(int s, char * hostip, char * filename, char * board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "/tmp/parted.sh /dev/mmcblk0");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	sendcmd(s, cmd, sizeof(cmd));
 
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mke2fs -T ext2 /dev/mmcblk0p1");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd, "FAILED.\n");
 		memset(cmd, '\0', MEMSIZE);
 		sprintf(cmd, "/tmp/mke2fs -T ext2 /dev/mmcblk0p1");
-		printf("%s\r", cmd);
-		fflush(stdout);
-		ret = sendcmd(s, cmd, sizeof(cmd));
 		fprintf(log_fd, "%s ", cmd);
+		ret = sendcmd(s, cmd, sizeof(cmd));
 		if(ret != 0){
 			fprintf(log_fd,"FAILED\n");
 			fclose(log_fd);
+			printf("Make ext2 sd card failed.\n");
 			exit(SD_FORMAT_ERROR);
 		}
 	}
@@ -144,8 +133,6 @@ void sdup(int s, char * hostip, char * filename, char * board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mkdir /tmp/images");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd, "FAILED.\n");
@@ -156,8 +143,6 @@ void sdup(int s, char * hostip, char * filename, char * board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mount -t jffs2 /dev/mtdblock3 /tmp/images");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd, "FAILED.\n");
@@ -168,12 +153,11 @@ void sdup(int s, char * hostip, char * filename, char * board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "dd if=/dev/mmcblk0 of=/tmp/images/mbr.bin bs=512 count=1");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Backup sd card mbr failed.\n");
 		exit(MBR_BACKUP_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -181,26 +165,21 @@ void sdup(int s, char * hostip, char * filename, char * board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mount / -o remount,rw");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	sendcmd(s, cmd, sizeof(cmd));
 
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mkdir /mnt/sd");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	sendcmd(s, cmd, sizeof(cmd));
 
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "mount -t ext2 /dev/mmcblk0p1 /mnt/sd");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Mount sd card failed.\n");
 		exit(SD_MOUNT_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -208,12 +187,11 @@ void sdup(int s, char * hostip, char * filename, char * board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "ftpget -u v400 -p v400 %s /mnt/sd/%s /usr/local/%s/share/%s", hostip, filename, board, filename);
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Get %s failed.\n", filename);
 		exit(IMAGE_GET_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -221,12 +199,11 @@ void sdup(int s, char * hostip, char * filename, char * board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "tar -xzvf /mnt/sd/%s -C /mnt/sd", filename);
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Unzip %s failed.\n", filename);
 		exit(IMAGE_UNZIP_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -234,34 +211,30 @@ void sdup(int s, char * hostip, char * filename, char * board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "rm -rf /mnt/sd/%s", filename);
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Delete image failed.\n");
 		exit(IMAGE_DEL_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
 
 	memset(cmd, '\0', MEMSIZE);
-	sprintf(cmd, "md5sum -c /mnt/sd/sd.md5", filename);
+	sprintf(cmd, "md5sum -c /mnt/sd/sd.md5");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Check md5 failed.\n");
 		exit(MD5_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
 
 	memset(cmd, '\0', MEMSIZE);
-	sprintf(cmd, "umount /mnt/sd", filename);
+	sprintf(cmd, "umount /mnt/sd");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
@@ -269,7 +242,9 @@ void sdup(int s, char * hostip, char * filename, char * board)
 		fprintf(log_fd, "OK.\n");
 	}
 
-	printf("SD upgrade SUCCESS\n");
+	fprintf(log_fd, "SD upgrade SUCCESS\n");
+	printf("SD upgrade SUCCESS\r");
+	fflush(stdout);
 }
 
 void getboard(char * filename, char * board)
@@ -288,21 +263,19 @@ void getboard(char * filename, char * board)
         }
 }
 
-void norup(int s, char * hostip, char * filename, char *board)
+void flashup(int s, char * hostip, char * filename, char *board)
 {
 	char cmd[MEMSIZE];
 	int ret = 0;
-	printf("board  = %s.\n", board);
 
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "cd /tmp");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("cd tmp failed.\n");
 		exit(CD_TMP_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -310,12 +283,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "ftpget -u v400 -p v400 %s kill-mods kill-mods", hostip);
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Remote get kill-mods failed.\n");
 		exit(IMAGE_GET_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -324,12 +296,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "chmod +x /tmp/kill-mods");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("chmod kill-mods failed.\n");
 		exit(CHANGE_MODE_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -337,12 +308,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "/tmp/kill-mods");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret < 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Execute kill-mods failed.\n");
 		exit(KILL_USR_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -351,12 +321,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "rm -rf /tmp/kill-mods");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret < 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Remove kill-mods failed.\n");
 		exit(RM_FILE_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -364,12 +333,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "sleep 1");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret < 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Sleep 1 failed.\n");
 		exit(SLEEP_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -377,12 +345,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "ftpget -u v400 -p v400 %s veextmp.ko veextmp.ko", hostip);
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret < 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Remote get veextmp failed.\n");
 		exit(IMAGE_GET_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -390,12 +357,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "insmod veextmp.ko");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret < 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("insmod veextmp failed.\n");
 		exit(INSMOD_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -403,12 +369,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "rmmod veextmp.ko");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret < 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("rmmod veextmp failed.\n");
 		exit(RMMOD_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -416,12 +381,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "umount /usr");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret < 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("umount /usr failed.\n");
 		exit(UMOUNT_USR_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -429,12 +393,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "ftpget -u v400 -p v400 %s %s /usr/local/%s/share/%s", hostip, filename, board, filename);
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Remote get %s failed.\n", filename);
 		exit(IMAGE_GET_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -442,12 +405,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "sleep 1");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret < 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Sleep 1 failed.\n");
 		exit(SLEEP_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -455,12 +417,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "tar xvf %s", filename);
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Unzip %s failed.\n", filename);
 		exit(IMAGE_UNZIP_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -468,12 +429,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "sleep 2");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret < 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Sleep 2 failed.\n");
 		exit(SLEEP_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -481,22 +441,18 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "rm -rf %s", filename);
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Remove %s failed.\n", filename);
 		exit(RM_FILE_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
 
-#if 0
 	memset(cmd, '\0', MEMSIZE);
-	sprintf(cmd, "ls version", filename);
+	sprintf(cmd, "ls version");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret == 0){
 		fprintf(log_fd,"OK\n");
@@ -504,22 +460,21 @@ void norup(int s, char * hostip, char * filename, char *board)
 		memset(cmd, '\0', MEMSIZE);
 		sprintf(cmd, "diff version /etc/version");
 		fprintf(log_fd, "%s ", cmd);
-		printf("%s\r", cmd);
-		fflush(stdout);
 		ret = sendcmd(s, cmd, sizeof(cmd));
 		fprintf(log_fd, "OK.\n");
 		if(ret != 0){
 			fprintf(log_fd,"Rootfs version is different, upgrade kernel and rootfs\n");
+			printf("Upgrading kernel and rootfs.\r");
+			fflush(stdout);
 
 			memset(cmd, '\0', MEMSIZE);
 			sprintf(cmd, "yes|uuu -w kernel.img Kernel");
 			fprintf(log_fd, "%s ", cmd);
-			printf("%s\r", cmd);
-			fflush(stdout);
 			ret = sendcmd(s, cmd, sizeof(cmd));
 			if(ret != 0){
 				fprintf(log_fd,"FAILED\n");
 				fclose(log_fd);
+				printf("Write kernel failed.\n");
 				exit(WRITE_KERNEL_ERROR);
 			}
 			fprintf(log_fd, "OK.\n");
@@ -527,12 +482,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 			memset(cmd, '\0', MEMSIZE);
 			sprintf(cmd, "rm -rf kernel.img tmp");
 			fprintf(log_fd, "%s ", cmd);
-			printf("%s\r", cmd);
-			fflush(stdout);
 			ret = sendcmd(s, cmd, sizeof(cmd));
 			if(ret != 0){
 				fprintf(log_fd,"FAILED\n");
 				fclose(log_fd);
+				printf("Remove kernel failed.\n");
 				exit(RM_FILE_ERROR);
 			}
 			fprintf(log_fd, "OK.\n");
@@ -540,12 +494,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 			memset(cmd, '\0', MEMSIZE);
 			sprintf(cmd, "yes|uuu -w rootfs.img RootFS");
 			fprintf(log_fd, "%s ", cmd);
-			printf("%s\r", cmd);
-			fflush(stdout);
 			ret = sendcmd(s, cmd, sizeof(cmd));
 			if(ret != 0){
 				fprintf(log_fd,"FAILED\n");
 				fclose(log_fd);
+				printf("Write rootfs failed.\n");
 				exit(WRITE_ROOTFS_ERROR);
 			}
 			fprintf(log_fd, "OK.\n");
@@ -553,12 +506,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 			memset(cmd, '\0', MEMSIZE);
 			sprintf(cmd, "rm -rf rootfs.img tmp kroot.md5 version");
 			fprintf(log_fd, "%s ", cmd);
-			printf("%s\r", cmd);
-			fflush(stdout);
 			ret = sendcmd(s, cmd, sizeof(cmd));
 			if(ret != 0){
 				fprintf(log_fd,"FAILED\n");
 				fclose(log_fd);
+				printf("Remove rootfs kroot.md5 version failed.\n");
 				exit(RM_FILE_ERROR);
 			}
 			fprintf(log_fd, "OK.\n");
@@ -568,12 +520,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 			memset(cmd, '\0', MEMSIZE);
 			sprintf(cmd, "rm -rf kernel.img rootfs.img kroot.md5 version");
 			fprintf(log_fd, "%s ", cmd);
-			printf("%s\r", cmd);
-			fflush(stdout);
 			ret = sendcmd(s, cmd, sizeof(cmd));
 			if(ret != 0){
 				fprintf(log_fd,"FAILED\n");
 				fclose(log_fd);
+				printf("Remove kernel rootfs kroot.md5 version failed.\n");
 				exit(RM_FILE_ERROR);
 			}
 			fprintf(log_fd, "OK.\n");
@@ -585,12 +536,11 @@ void norup(int s, char * hostip, char * filename, char *board)
 		memset(cmd, '\0', MEMSIZE);
 		sprintf(cmd, "rm -rf kernel.img rootfs.img kroot.md5 version");
 		fprintf(log_fd, "%s ", cmd);
-		printf("%s\r", cmd);
-		fflush(stdout);
 		ret = sendcmd(s, cmd, sizeof(cmd));
 		if(ret != 0){
 			fprintf(log_fd,"FAILED\n");
 			fclose(log_fd);
+			printf("Remove kernel rootfs kroot.md5 version failed.\n");
 			exit(RM_FILE_ERROR);
 		}
 		fprintf(log_fd, "OK.\n");
@@ -599,25 +549,26 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "sleep 1");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Sleep 1 failed.\n");
 		exit(SLEEP_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
 
+	printf("Upgrading usr applications.\r");
+	fflush(stdout);
+
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "yes|uuu -w userfs.jffs2 UserFSA");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("write usr image failed.\n");
 		exit(WRITE_USR_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
@@ -625,18 +576,18 @@ void norup(int s, char * hostip, char * filename, char *board)
 	memset(cmd, '\0', MEMSIZE);
 	sprintf(cmd, "rm tmp userfs.jffs2 userfs.jffs2.md5");
 	fprintf(log_fd, "%s ", cmd);
-	printf("%s\r", cmd);
-	fflush(stdout);
 	ret = sendcmd(s, cmd, sizeof(cmd));
 	if(ret != 0){
 		fprintf(log_fd,"FAILED\n");
 		fclose(log_fd);
+		printf("Remove usr image and md5 failed.\n");
 		exit(RM_FILE_ERROR);
 	}
 	fprintf(log_fd, "OK.\n");
-#endif
+
 	fprintf(log_fd, "Norflash upgrade SUCCESS\n");
-	printf("Norflash upgrade SUCCESS\n");
+	printf("Norflash upgrade SUCCESS\r");
+	fflush(stdout);
 }
 
 int main(int argc, char *argv[])
@@ -645,22 +596,17 @@ int main(int argc, char *argv[])
 	struct sockaddr_in server_addr; /* 服务器地址结构 */
 	int ret = 0;
 	char *sdimage = "ux400-module-sd.tar.gz";
-//	char *image = argv[3];
-//	char *board = argv[5];
 
-
-	printf("board = %s.\n", argv[5]);
 	log_fd = fopen(argv[6], "w+");
 	if(log_fd == NULL){
-		printf("Log file %s open failed!\n", argv[6]);
+		printf("Log file %s open failed.\n", argv[6]);
 		exit(4);
 	}
 
 	fprintf(log_fd, "Start...\n");
-	printf("Start...\n");
 
-	if(argc != 6){
-		printf("Usage: target_IP port_num source_IP image_file_name log_file_name\n");
+	if(argc != 7){
+		printf("Usage: target_IP port_num source_IP image_file_name boardname log_file_name\n");
 		fprintf(log_fd, "Wrong input, argc=%d\n", argc);
 		fclose(log_fd);
 		exit(1);
@@ -692,7 +638,7 @@ int main(int argc, char *argv[])
 	/* 连接服务器 */
 	ret = connect(mod_s, (struct sockaddr *)&server_addr, sizeof(server_addr));
 	if(ret < 0){
-		printf("Connect to server %s failed!\n", argv[1]);
+		printf("Connect to server %s failed.\n", argv[1]);
 		fprintf(log_fd, "Connect to server %s failed, port is %d, error is : %s\n", argv[1], port, strerror(errno));
 		fclose(log_fd);
 		exit(4);
@@ -701,24 +647,21 @@ int main(int argc, char *argv[])
 	process_conn_client(s);     /* 客户端处理过程 */
 #endif
 	fprintf(log_fd, "Server %s connect successed, start upgrading now\n", argv[1]);
-	printf("Server %s connect successed, start upgrading now\n", argv[1]);
 
-	if (strcmp(sdimage, argv[3]) == 0) {
-		fprintf(log_fd, "Upgrading SD card.\n", argv[1]);
-		printf("Upgrading SD card.\n", argv[1]);
+	if (strcmp(sdimage, argv[4]) == 0) {
+		fprintf(log_fd, "Upgrading SD card.\n");
+		printf("Upgrading SD card.\r");
+		fflush(stdout);
 		sdup(mod_s, argv[3], argv[4], argv[5]);
 	} else {
 		fprintf(log_fd, "Upgrading Norflash.\n", argv[1]);
-		printf("Upgrading Norflash.\n", argv[1]);
-		norup(mod_s, argv[3], argv[4], argv[5]);
+		printf("Upgrading Norflash.\r");
+		fflush(stdout);
+		flashup(mod_s, argv[3], argv[4], argv[5]);
 	}
 
 	close(mod_s);		  /* 关闭连接 */
 	fclose(log_fd);
-
-	fprintf(log_fd, "Subboard upgrade SUCCESS!\n");
-	printf("Subboard upgrade SUCCESS!\n");
-
 	exit(0);
 }
 
