@@ -585,8 +585,8 @@ void flashup(int s, char * hostip, char * filename, char *board)
 	}
 	fprintf(log_fd, "OK.\n");
 
-	fprintf(log_fd, "Norflash upgrade SUCCESS\n");
-	printf("Norflash upgrade SUCCESS\r");
+	fprintf(log_fd, "flash upgrade SUCCESS\n");
+	printf("flash upgrade SUCCESS\r");
 	fflush(stdout);
 }
 
@@ -654,8 +654,8 @@ int main(int argc, char *argv[])
 		fflush(stdout);
 		sdup(mod_s, argv[3], argv[4], argv[5]);
 	} else {
-		fprintf(log_fd, "Upgrading Norflash.\n", argv[1]);
-		printf("Upgrading Norflash.\r");
+		fprintf(log_fd, "Upgrading flash.\n");
+		printf("Upgrading flash.\r");
 		fflush(stdout);
 		flashup(mod_s, argv[3], argv[4], argv[5]);
 	}
