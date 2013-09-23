@@ -84,7 +84,7 @@ void sdup(int s, char * hostip, char * filename, char * board)
 	sprintf(cmd, "ls /dev/mmcblk0*");
 	fprintf(log_fd, "%s ", cmd);
 	ret = sendcmd(s, cmd, sizeof(cmd));
-	if(ret < 0){
+	if(ret != 0){
 		fprintf(log_fd,"No SD card found, upgrade SD card exit.\n");
 		fclose(log_fd);
 		printf("No SD card found, upgrade SD card exit.\n");
@@ -263,7 +263,7 @@ void getboard(char * filename, char * board)
         }
 }
 
-void flashup(int s, char * hostip, char * filename, char *board)
+void flashup(int s, char * hostip, char * filename, char *board, char *location)
 {
 	char cmd[MEMSIZE];
 	int ret = 0;
@@ -464,7 +464,7 @@ void flashup(int s, char * hostip, char * filename, char *board)
 		fprintf(log_fd, "OK.\n");
 		if(ret != 0){
 			fprintf(log_fd,"Rootfs version is different, upgrade kernel and rootfs\n");
-			printf("Upgrading kernel and rootfs.\r");
+			printf("%s: Upgrading kernel and rootfs.\r", location);
 			fflush(stdout);
 
 			memset(cmd, '\0', MEMSIZE);
@@ -558,7 +558,7 @@ void flashup(int s, char * hostip, char * filename, char *board)
 	}
 	fprintf(log_fd, "OK.\n");
 
-	printf("Upgrading usr applications.\r");
+	printf("%s: Upgrading usr applications.\r", location);
 	fflush(stdout);
 
 	memset(cmd, '\0', MEMSIZE);
@@ -605,8 +605,8 @@ int main(int argc, char *argv[])
 
 	fprintf(log_fd, "Start...\n");
 
-	if(argc != 7){
-		printf("Usage: target_IP port_num source_IP image_file_name boardname log_file_name\n");
+	if(argc != 8){
+		printf("Usage: target_IP port_num source_IP image_file_name boardname log_file_name location\n");
 		fprintf(log_fd, "Wrong input, argc=%d\n", argc);
 		fclose(log_fd);
 		exit(1);
@@ -638,7 +638,7 @@ int main(int argc, char *argv[])
 	/* connect server */
 	ret = connect(mod_s, (struct sockaddr *)&server_addr, sizeof(server_addr));
 	if(ret < 0){
-		printf("Connect to server %s failed.\n", argv[1]);
+		printf("%s: Connect to server %s failed.\n", argv[7], argv[1]);
 		fprintf(log_fd, "Connect to server %s failed, port is %d, error is : %s\n", argv[1], port, strerror(errno));
 		fclose(log_fd);
 		exit(4);
@@ -650,14 +650,14 @@ int main(int argc, char *argv[])
 
 	if (strcmp(sdimage, argv[4]) == 0) {
 		fprintf(log_fd, "Upgrading SD card.\n");
-		printf("Upgrading SD card.\r");
+		printf("%s: Upgrading SD card.\r", argv[7]);
 		fflush(stdout);
 		sdup(mod_s, argv[3], argv[4], argv[5]);
 	} else {
 		fprintf(log_fd, "Upgrading flash.\n");
-		printf("Upgrading flash.\r");
+		printf("%s: Upgrading flash.\r", argv[7]);
 		fflush(stdout);
-		flashup(mod_s, argv[3], argv[4], argv[5]);
+		flashup(mod_s, argv[3], argv[4], argv[5], argv[7]);
 	}
 
 	close(mod_s);		  /* close connect */
